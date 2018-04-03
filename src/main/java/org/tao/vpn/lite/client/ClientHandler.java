@@ -4,17 +4,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.Date;
 
 import org.tao.vpn.lite.crypt.CryptUtils;
 
 public class ClientHandler implements Runnable {
     private Socket socketIn;
     private Socket socketOut;
-
-    private long   totalUpload   = 0l;
-    private long   totalDownload = 0l;
-    private String host          = null;
+    private String host = null;
     private int    port;
 
     public ClientHandler(Socket socket, String host, int port) {
@@ -28,9 +24,7 @@ public class ClientHandler implements Runnable {
     @Override
     public void run() {
 
-        StringBuffer builder = new StringBuffer();
         try {
-            builder.append("\r\n").append("Request Time  ：" + new Date());
 
             InputStream isIn = socketIn.getInputStream();
             OutputStream osIn = socketIn.getOutputStream();
@@ -65,16 +59,7 @@ public class ClientHandler implements Runnable {
                 } catch (IOException e) {
                 }
             }
-            builder.append("\r\n").append("Up    Bytes  ：" + totalUpload);
-            builder.append("\r\n").append("Down  Bytes  ：" + totalDownload);
-            builder.append("\r\n").append("Closed Time  ：" + new Date());
-            builder.append("\r\n");
-            logRequestMsg(builder.toString());
         }
-    }
-
-    private synchronized void logRequestMsg(String msg) {
-        System.out.println(msg);
     }
 
     private void readForwardDate(InputStream isIn, OutputStream osOut) {
@@ -90,7 +75,6 @@ public class ClientHandler implements Runnable {
                     osOut.write(buffer, 0, len);
                     osOut.flush();
                 }
-                totalUpload += len;
                 if (socketIn.isClosed() || socketOut.isClosed()) {
                     break;
                 }
@@ -125,7 +109,6 @@ public class ClientHandler implements Runnable {
                         }
                         osIn.write(buffer, 0, len);
                         osIn.flush();
-                        totalDownload += len;
                     }
                     if (socketIn.isOutputShutdown() || socketOut.isClosed()) {
                         break;

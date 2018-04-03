@@ -1,20 +1,25 @@
-package org.tao.vpn.lite;
+package org.tao.vpn.repeater;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+
 import org.tao.vpn.lite.crypt.CryptUtils;
 
-public class ServerHandler implements Runnable {
+public class RepeaterHandler implements Runnable {
     private Socket socketIn;
     private Socket socketOut;
 
-    public ServerHandler(Socket socket) {
+    private String host = null;
+    private int    port;
+
+    public RepeaterHandler(Socket socket, String host, int port) {
         this.socketIn = socket;
+        this.host = host;
+        this.port = port;
     }
 
-    private static final String AUTHORED    = "HTTP/1.1 200 Connection established\r\n\r\n";
     private static final String SERVERERROR = "HTTP/1.1 500 Connection FAILED\r\n\r\n";
 
     @Override
@@ -24,38 +29,14 @@ public class ServerHandler implements Runnable {
 
             InputStream isIn = socketIn.getInputStream();
             OutputStream osIn = socketIn.getOutputStream();
-            HeaderHandler header = HeaderHandler.readHeader(isIn);
 
-            if (header.getHost() == null || header.getPort() == null) {
-                byte[] tmpBytes = SERVERERROR.getBytes();
-                for (int i = 0; i < tmpBytes.length; i++) {
-                    tmpBytes[i] = CryptUtils.encrypt(tmpBytes[i]);
-                }
-                osIn.write(tmpBytes);
-                osIn.flush();
-                return;
-            }
-
-            socketOut = new Socket(header.getHost(), Integer.parseInt(header.getPort()));
-            socketOut.setSoTimeout(30000);
+            socketOut = new Socket(host, port);
             socketOut.setKeepAlive(true);
             InputStream isOut = socketOut.getInputStream();
             OutputStream osOut = socketOut.getOutputStream();
-            Thread ot = new Thread(new DataSendThread(isOut, osIn));
+            Thread ot = new DataSendThread(isOut, osIn);
             ot.start();
-            if (header.getMethod().equals(HeaderHandler.METHOD_CONNECT)) {
-                byte[] tmpBytes = AUTHORED.getBytes();
-                for (int i = 0; i < tmpBytes.length; i++) {
-                    tmpBytes[i] = CryptUtils.encrypt(tmpBytes[i]);
-                }
-                osIn.write(tmpBytes);
-                osIn.flush();
-            } else {
-                byte[] headerData = header.toString().getBytes();
 
-                osOut.write(headerData);
-                osOut.flush();
-            }
             readForwardDate(isIn, osOut);
             ot.join();
         } catch (Exception e) {
@@ -79,6 +60,7 @@ public class ServerHandler implements Runnable {
                 } catch (IOException e) {
                 }
             }
+
         }
     }
 
@@ -88,8 +70,9 @@ public class ServerHandler implements Runnable {
             int len;
             while ((len = isIn.read(buffer)) != -1) {
                 if (len > 0) {
+
                     for (int i = 0; i < len; i++) {
-                        buffer[i] = (byte) CryptUtils.decrypt(buffer[i]);
+                        buffer[i] = CryptUtils.encrypt(buffer[i]);
                     }
                     osOut.write(buffer, 0, len);
                     osOut.flush();
@@ -102,11 +85,12 @@ public class ServerHandler implements Runnable {
             try {
                 socketOut.close();
             } catch (IOException e1) {
+                e1.printStackTrace();
             }
         }
     }
 
-    class DataSendThread implements Runnable {
+    class DataSendThread extends Thread {
         private InputStream  isOut;
         private OutputStream osIn;
 
@@ -123,7 +107,7 @@ public class ServerHandler implements Runnable {
                 while ((len = isOut.read(buffer)) != -1) {
                     if (len > 0) {
                         for (int i = 0; i < len; i++) {
-                            buffer[i] = (byte) CryptUtils.encrypt(buffer[i]);
+                            buffer[i] = CryptUtils.decrypt(buffer[i]);
                         }
                         osIn.write(buffer, 0, len);
                         osIn.flush();
@@ -133,6 +117,7 @@ public class ServerHandler implements Runnable {
                     }
                 }
             } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     }
