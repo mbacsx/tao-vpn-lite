@@ -18,14 +18,14 @@ public class Client {
         System.out.println("listening port:" + listenPort + "……");
         System.out.println();
         System.out.println();
-
+        if (args.length >= 3) {
+            listenPort = Integer.parseInt(args[2]);
+        }
         while (true) {
             Socket socket = null;
 
             try {
-                if (args.length >= 3) {
-                    listenPort = Integer.parseInt(args[2]);
-                }
+              
                 socket = serverSocket.accept();
                 socket.setKeepAlive(true);
 

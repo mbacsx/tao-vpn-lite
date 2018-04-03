@@ -5,19 +5,17 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 
-import org.tao.vpn.lite.crypt.CryptUtils;
-
+ 
 public class RepeaterHandler implements Runnable {
     private Socket socketIn;
     private Socket socketOut;
 
-    private String host = null;
-    private int    port;
 
-    public RepeaterHandler(Socket socket, String host, int port) {
-        this.socketIn = socket;
-        this.host = host;
-        this.port = port;
+
+    public RepeaterHandler(Socket socketIn, Socket socketOut) {
+        this.socketIn = socketIn;
+
+        this.socketOut = socketOut;
     }
 
     private static final String SERVERERROR = "HTTP/1.1 500 Connection FAILED\r\n\r\n";
@@ -29,9 +27,6 @@ public class RepeaterHandler implements Runnable {
 
             InputStream isIn = socketIn.getInputStream();
             OutputStream osIn = socketIn.getOutputStream();
-
-            socketOut = new Socket(host, port);
-            socketOut.setKeepAlive(true);
             InputStream isOut = socketOut.getInputStream();
             OutputStream osOut = socketOut.getOutputStream();
             Thread ot = new DataSendThread(isOut, osIn);
@@ -71,9 +66,6 @@ public class RepeaterHandler implements Runnable {
             while ((len = isIn.read(buffer)) != -1) {
                 if (len > 0) {
 
-                    for (int i = 0; i < len; i++) {
-                        buffer[i] = CryptUtils.encrypt(buffer[i]);
-                    }
                     osOut.write(buffer, 0, len);
                     osOut.flush();
                 }
@@ -106,9 +98,7 @@ public class RepeaterHandler implements Runnable {
                 int len;
                 while ((len = isOut.read(buffer)) != -1) {
                     if (len > 0) {
-                        for (int i = 0; i < len; i++) {
-                            buffer[i] = CryptUtils.decrypt(buffer[i]);
-                        }
+
                         osIn.write(buffer, 0, len);
                         osIn.flush();
                     }
