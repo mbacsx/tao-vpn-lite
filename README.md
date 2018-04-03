@@ -9,7 +9,7 @@
 
 网络图如下：
 
-<div class="scale">![](https://supermax197.github.io/img/TaoVPNLiteNet.png)</div>
+![avatar](https://supermax197.github.io/img/TaoVPNLiteNet.png)
 
 架构模型图如下：
 
