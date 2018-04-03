@@ -12,15 +12,16 @@ public class Client {
     private static ServerSocket serverSocket;
 
     public static void main(String[] args) throws Exception {
+        if (args.length >= 3) {
+            listenPort = Integer.parseInt(args[2]);
+        }
         serverSocket = new ServerSocket(listenPort);
         final ExecutorService tpe = Executors.newCachedThreadPool();
         System.out.println("Tao VPN Lite Client Start At " + new Date());
         System.out.println("listening port:" + listenPort + "……");
         System.out.println();
         System.out.println();
-        if (args.length >= 3) {
-            listenPort = Integer.parseInt(args[2]);
-        }
+       
         while (true) {
             Socket socket = null;
 

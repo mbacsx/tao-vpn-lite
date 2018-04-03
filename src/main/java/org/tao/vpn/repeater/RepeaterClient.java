@@ -9,14 +9,14 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 public class RepeaterClient {
 
-     static LinkedBlockingQueue<Socket> serverSockets       = new LinkedBlockingQueue<Socket>();
+    static LinkedBlockingQueue<Socket> serverSockets = new LinkedBlockingQueue<Socket>();
 
     public static void main(String[] args) throws Exception {
         final ExecutorService tpe = Executors.newCachedThreadPool();
         System.out.println("Tao VPN Lite Repeater Client Start At " + new Date());
         System.out.println();
         System.out.println();
- 
+
         while (true) {
             Socket socket = null;
 
@@ -30,16 +30,18 @@ public class RepeaterClient {
                 for (Socket soc : socketsClosed) {
                     serverSockets.remove(soc);
                 }
-                if (serverSockets.size()>60){
+                if (serverSockets.size() > 30) {
                     Thread.sleep(1000);
                     continue;
                 }
                 socket = new Socket(args[2], Integer.parseInt(args[3]));//repeater ip port
                 socket.setKeepAlive(true);
+                socket.setSoTimeout(3000000);
                 serverSockets.add(socket);
                 Socket socketOut = new Socket(args[0], Integer.parseInt(args[1])); // server ip port
-                        socketOut.setKeepAlive(true);
-                tpe.execute(new RepeaterHandler(socket,socketOut  ));
+                socketOut.setKeepAlive(true);
+                socketOut.setSoTimeout(30000);
+                tpe.execute(new RepeaterHandler(socket, socketOut));
             } catch (Exception e) {
                 e.printStackTrace();
                 Thread.sleep(1000);

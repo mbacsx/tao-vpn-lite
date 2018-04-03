@@ -10,7 +10,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 public class Repeater {
 
-    private static int                 listenPort_A        = 8084;
+    private static int                 listenPort_A        = 8083;
     private static int                 listenPort_B        = 8085;
 
     private static ServerSocket        serverSocket_A;
@@ -21,7 +21,14 @@ public class Repeater {
     static Object                      _lock               = new Object();
 
     public static void main(String[] args) throws Exception {
+        if (args.length >= 1) {
+            listenPort_A = Integer.parseInt(args[0]);
+        }
+        if (args.length >= 2) {
+            listenPort_B = Integer.parseInt(args[1]);
+        }
         serverSocket_A = new ServerSocket(listenPort_A);
+        serverSocket_B = new ServerSocket(listenPort_B);
         final ExecutorService exeServ = Executors.newCachedThreadPool();
         System.out.println("Tao VPN Lite Repeater Start At " + new Date());
         System.out.println("listening port A:" + listenPort_A + "……");
@@ -29,12 +36,7 @@ public class Repeater {
 
         System.out.println();
         System.out.println();
-        if (args.length >= 3) {
-            listenPort_A = Integer.parseInt(args[2]);
-        }
-        if (args.length >= 4) {
-            listenPort_B = Integer.parseInt(args[3]);
-        }
+        
 
         new Thread(new Runnable() {
 
@@ -43,6 +45,7 @@ public class Repeater {
                 while (true) {
                     try {
                         Socket socket = serverSocket_B.accept();
+                        socket.setSoTimeout(30000);
                         socket.setKeepAlive(true);
                         ArrayList<Socket> socketsClosed = new ArrayList<Socket>();
                         for (Socket soc : serverSocketsRuning) {
@@ -53,7 +56,7 @@ public class Repeater {
                         for (Socket soc : socketsClosed) {
                             serverSocketsRuning.remove(soc);
                         }
-                        if (serverSocketsRuning.size() < 60) {
+                        if (serverSocketsRuning.size() < 30) {
                             serverSockets.add(socket);
                         } else {
                             socket.close();
@@ -76,7 +79,7 @@ public class Repeater {
 
                 socket_A = serverSocket_A.accept();
                 socket_A.setKeepAlive(true);
-
+                socket_A.setSoTimeout(30000);
                 while (true) {
                     synchronized (_lock) {
 
