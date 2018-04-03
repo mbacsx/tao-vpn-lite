@@ -18,7 +18,7 @@ public class Server {
         }
         serverSocket = new ServerSocket(listenPort);
         final ExecutorService tpe = Executors.newCachedThreadPool();
-        System.out.println("Proxy Server Start At " + new Date());
+        System.out.println("Tao VPN Lite Server Start At " + new Date());
         System.out.println("listening port:" + listenPort + "……");
         System.out.println();
         System.out.println();
