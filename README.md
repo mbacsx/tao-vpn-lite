@@ -13,7 +13,7 @@
 
 架构模型图如下：
 
-<div class="scale">![](img/TaoVPNLiteModel.png)</div>
+![avatar](https://supermax197.github.io/img/TaoVPNLiteModel.png)
 
 道VPN Lite版支持http与https协议。也就是说支持几乎所有网站、网络游戏及应用。
 
@@ -44,7 +44,7 @@ exit 0_
 
 如果你支持道VPN Lite，可以通过扫描以下二维码或点击paypal按钮进行赞助。
 
-<div class="scale">![](img/weixin.png)</div>
+![avatar](https://supermax197.github.io/img/weixin.png)
 
 <div class="scale">
 
@@ -52,6 +52,6 @@ exit 0_
 
 </div>
 
-<div class="scale">![](img/zhifubao.jpg)</div>
+![avatar](https://supermax197.github.io/img/zhifubao.jpg)
 
 </article>
