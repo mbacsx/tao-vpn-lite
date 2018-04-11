@@ -62,8 +62,13 @@ public class ServerHandler implements Runnable {
             e.printStackTrace();
             if (!socketIn.isOutputShutdown()) {
                 try {
-                    socketIn.getOutputStream().write(SERVERERROR.getBytes());
-                } catch (IOException e1) {
+                    byte[] tmpBytes = SERVERERROR.getBytes();
+                    for (int i = 0; i < tmpBytes.length; i++) {
+                        tmpBytes[i] = CryptUtils.encrypt(tmpBytes[i]);
+                    }
+                    socketIn.getOutputStream().write(tmpBytes);
+                    socketIn.getOutputStream().flush();
+                 } catch (IOException e1) {
                 }
             }
         } finally {
